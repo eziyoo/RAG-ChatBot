@@ -1,0 +1,28 @@
+TITLE: Clinic General FAQ
+CATEGORY: FAQ
+URL: https://clinic.example.com/faq
+UPDATED: 2025-04-12
+
+Q: What are your clinic hours?
+A: Our main clinic is open Monday through Friday 8:00 AM to 6:00 PM, and Saturdays from 9:00 AM to 1:00 PM. We are closed on Sundays and public holidays.
+
+Q: How do I book an appointment?
+A: You can book an appointment online through our patient portal at portal.clinic.example.com, by calling our front desk at (555) 100-2000, or by walking in during clinic hours.
+
+Q: How early should I arrive for my first appointment?
+A: Please arrive 15 minutes early to complete new-patient paperwork. Bring a valid photo ID, your insurance card, and a list of current medications.
+
+Q: Can I bring a family member to my appointment?
+A: Yes. One adult companion is welcome. For minors under 18, a legal guardian must be present.
+
+Q: How do I access my medical records?
+A: Medical records requests must be submitted in writing using the Records Release Form available at reception or on our website. Turnaround is typically 5–7 business days.
+
+Q: Do you offer telehealth appointments?
+A: Yes. Telehealth is available for follow-up visits, prescription renewals, and non-urgent consultations. Use the patient portal to schedule a video visit.
+
+Q: What languages does your staff speak?
+A: Our clinical staff speak English and Spanish. Translation services for other languages can be arranged with 48 hours notice.
+
+Q: Is parking available?
+A: Free parking is available in the surface lot on the north side of our building. Accessible spaces are located near the main entrance.

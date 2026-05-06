@@ -1,0 +1,42 @@
+TITLE: Insurance Coverage Guide
+CATEGORY: Insurance
+URL: https://clinic.example.com/insurance
+UPDATED: 2025-03-28
+
+ACCEPTED INSURANCE PLANS:
+We currently accept the following insurance plans:
+- Blue Cross Blue Shield (all tiers including PPO and HMO)
+- Aetna (commercial and Medicare Advantage)
+- Cigna (individual and employer group plans)
+- United Healthcare (Choice Plus and Navigate plans)
+- Humana (HMO and PPO)
+- Medicare Part B (Original Medicare)
+- Medicaid (state-administered plans, income-eligible patients)
+- Oscar Health
+
+OUT-OF-NETWORK:
+We are not in-network with Anthem, WellCare, or Molina Healthcare as of 2025.
+Patients with these plans may still be seen but should expect higher out-of-pocket costs.
+
+BILLING:
+We bill your insurance directly. You are responsible for your co-pay at the time
+of service. Deductibles and coinsurance amounts depend on your specific plan.
+Please contact your insurer to verify your benefits before your visit.
+
+SELF-PAY:
+Self-pay patients receive a 20% discount on listed service fees. Payment plans
+are available for balances over $500. Speak with our billing department at
+billing@clinic.example.com.
+
+INSURANCE CARD:
+Please bring your physical insurance card to every visit. Digital copies on
+your phone are also accepted.
+
+PRIOR AUTHORIZATIONS:
+Some procedures and specialist referrals require prior authorization from your
+insurer. Our referral coordinator will initiate this process on your behalf.
+Allow 3–5 business days.
+
+CLAIM DISPUTES:
+If you receive an unexpected bill, contact our billing department within 30 days.
+We will work with your insurer to resolve discrepancies.
