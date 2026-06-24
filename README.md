@@ -1,36 +1,53 @@
 # 🏥 RAG Clinic Assistant
 
-A Retrieval-Augmented Generation (RAG) chatbot that answers questions about clinic documents using LlamaIndex, ChromaDB, and OpenAI. Includes both a terminal interface and a Gradio web UI.
+A production-style Retrieval-Augmented Generation (RAG) chatbot that answers questions about clinic documents. Built with **LlamaIndex**, **ChromaDB**, **OpenAI**, and served via a **FastAPI** backend with a clean, framework-free HTML/CSS/JS frontend.
 
 ---
 
-## 📸 Demo
+## ✨ Features
 
-> Ask questions like *"How do I prepare for a colonoscopy?"* or *"What are my rights as a patient?"* and get accurate, document-grounded answers instantly.
+- 💬 ChatGPT-style dark web UI — no React, no Vue, pure HTML/CSS/JS
+- 🔍 Semantic search over clinic documents using vector embeddings
+- 🤖 Answers grounded in your documents via `gpt-4o-mini`
+- 💾 Automatic per-session chat backup to `chatBackup/` as JSON
+- ⚡ FastAPI backend with instant startup — index loaded once at boot
+- 📱 Responsive layout — works on mobile and desktop
+- 🗂️ Sidebar with document list and "New Chat" button
 
 ---
 
 ## 🧠 How It Works
 
-This project uses the RAG (Retrieval-Augmented Generation) pattern:
+This project implements the standard RAG pipeline in two phases:
 
-1. **Ingest** — Documents in the `docs/` folder are loaded, split into chunks, and embedded using OpenAI's embedding model. Vectors are stored in a local ChromaDB database.
-2. **Retrieve** — When a question is asked, the top 3 most semantically similar chunks are retrieved from ChromaDB.
-3. **Generate** — The retrieved chunks are passed to `gpt-4o-mini` as context, which generates a grounded, accurate answer.
+### Offline — Indexing (run once)
 
 ```
-docs/ (your documents)
-    │
-    ▼
-[ingest.py] → chunks → embeddings → chroma_db/
-                                          │
-                    User question ────────┘
-                          │
-                    [similarity search]
-                          │
-                    [gpt-4o-mini generates answer]
-                          │
-                    🤖 Response
+docs/ (your .txt / .pdf files)
+       │
+       ▼
+[ingest.py]
+  → split into 512-token chunks
+  → embed with OpenAI text-embedding-ada-002
+  → store vectors in ./chroma_db
+```
+
+### Online — Query (every request)
+
+```
+User question
+      │
+      ▼
+[Embed question] → vector
+      │
+      ▼
+[ChromaDB] → top 3 semantically similar chunks
+      │
+      ▼
+[gpt-4o-mini] ← chunks + question as context
+      │
+      ▼
+  🤖 Grounded answer
 ```
 
 ---
@@ -39,7 +56,7 @@ docs/ (your documents)
 
 ```
 RAG-ChatBot/
-├── docs/                        # Source documents (clinic knowledge base)
+├── docs/                              # Source documents (clinic knowledge base)
 │   ├── blood_tests_reference.txt
 │   ├── clinic_faq.txt
 │   ├── colonoscopy_prep.txt
@@ -48,11 +65,14 @@ RAG-ChatBot/
 │   ├── patient_rights.txt
 │   ├── prescription_refill_policy.txt
 │   └── telehealth_guide.txt
-├── chroma_db/                   # Auto-generated vector database (git-ignored)
-├── ingest.py                    # Step 1: Load, chunk, embed, and store documents
-├── query.py                     # Step 2: Terminal-based Q&A interface
-├── app.py                       # Step 3: Gradio web UI
-├── .env                         # API keys (git-ignored)
+├── static/
+│   └── index.html                     # Full chat UI (single file, no frameworks)
+├── chroma_db/                         # Auto-generated vector DB (git-ignored)
+├── chatBackup/                        # Per-session chat logs as JSON (git-ignored)
+├── ingest.py                          # Step 1: Chunk, embed, and index documents
+├── query.py                           # Step 2: Terminal Q&A interface
+├── api.py                             # Step 3: FastAPI backend
+├── .env                               # API keys (git-ignored)
 ├── .gitignore
 └── README.md
 ```
@@ -71,8 +91,8 @@ cd RAG-ChatBot
 ### 2. Create a Virtual Environment
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate        # macOS/Linux
+python3 -m venv .venv
+source .venv/bin/activate        # macOS / Linux
 .venv\Scripts\activate           # Windows
 ```
 
@@ -82,15 +102,15 @@ source .venv/bin/activate        # macOS/Linux
 pip install -r requirements.txt
 ```
 
-### 4. Set Up Your API Key
+### 4. Configure Your API Key
 
 Create a `.env` file in the project root:
 
-```
+```env
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-> Get your API key from [platform.openai.com](https://platform.openai.com/api-keys)
+> Get your key from [platform.openai.com/api-keys](https://platform.openai.com/api-keys). Make sure billing is enabled — costs are minimal (fractions of a cent per query).
 
 ---
 
@@ -98,17 +118,27 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 ### Step 1 — Ingest Documents
 
-Run this **once** to embed your documents and build the vector database:
+Run **once** to build the vector database from your documents:
 
 ```bash
 python ingest.py
 ```
 
-This reads all files from `docs/`, chunks them into 512-token pieces, sends them to OpenAI for embedding, and stores everything in `./chroma_db`. You only need to re-run this if you add or change documents.
+This reads all files from `docs/`, chunks them into 512-token pieces, embeds them with OpenAI, and stores everything in `./chroma_db`.
 
-### Step 2A — Terminal Interface
+> Re-run this any time you add, remove, or update documents.
 
-Ask questions directly in your terminal:
+### Step 2 — Start the Web App
+
+```bash
+uvicorn api:app --reload
+```
+
+Open your browser at **[http://localhost:8000](http://localhost:8000)**.
+
+### Optional — Terminal Interface
+
+For quick testing without the web UI:
 
 ```bash
 python query.py
@@ -121,47 +151,89 @@ python query.py
 
 Type `exit` or `quit` to stop.
 
-### Step 2B — Web UI (Gradio)
-
-Launch the browser-based chat interface:
-
-```bash
-python app.py
-```
-
-Then open your browser at `http://localhost:7860`.
-
 ---
 
 ## 🛠️ Tech Stack
 
-| Component | Technology |
+| Layer | Technology |
 |---|---|
 | RAG Framework | [LlamaIndex](https://www.llamaindex.ai/) |
-| Vector Database | [ChromaDB](https://www.trychroma.com/) |
+| Vector Database | [ChromaDB](https://www.trychroma.com/) — local, no cloud needed |
 | Embedding Model | OpenAI `text-embedding-ada-002` |
 | LLM | OpenAI `gpt-4o-mini` |
-| Web UI | [Gradio](https://gradio.app/) |
-| Language | Python 3.10+ |
+| Backend | [FastAPI](https://fastapi.tiangolo.com/) + Uvicorn |
+| Frontend | Vanilla HTML / CSS / JavaScript (no frameworks) |
+| Environment | Python 3.10+ |
 
 ---
 
-## 📦 Requirements
+## 📦 Dependencies
 
-Generate with:
+Install all at once:
+
+```bash
+pip install -r requirements.txt
+```
+
+Key packages:
+
+```
+llama-index
+llama-index-vector-stores-chroma
+llama-index-llms-openai
+chromadb
+fastapi
+uvicorn
+python-multipart
+openai
+python-dotenv
+```
+
+Generate a fresh lockfile after adding packages:
 
 ```bash
 pip freeze > requirements.txt
 ```
 
-Key dependencies:
-- `llama-index`
-- `llama-index-vector-stores-chroma`
-- `llama-index-llms-openai`
-- `chromadb`
-- `gradio`
-- `openai`
-- `python-dotenv`
+---
+
+## 💾 Chat Backup
+
+Every conversation is automatically saved to `chatBackup/` as a JSON file. One file is created per session — it is overwritten on each message (not duplicated).
+
+```
+chatBackup/
+├── chat_2026-06-24_18-42-00.json   ← Session 1
+├── chat_2026-06-24_20-15-00.json   ← Session 2 (New Chat clicked)
+└── ...
+```
+
+Each file contains the full message history:
+
+```json
+{
+  "saved_at": "2026-06-24_18-43-15",
+  "session_id": "2026-06-24_18-42-00",
+  "messages": [
+    { "role": "user",      "content": "What are my rights as a patient?" },
+    { "role": "assistant", "content": "As a patient, you have the right to..." }
+  ]
+}
+```
+
+---
+
+## 📄 Adding New Documents
+
+1. Add `.txt`, `.pdf`, or `.docx` files to the `docs/` folder
+2. Delete the existing `chroma_db/` folder to avoid stale data:
+   ```bash
+   rm -rf chroma_db/
+   ```
+3. Re-run the ingestion pipeline:
+   ```bash
+   python ingest.py
+   ```
 
 ---
 
@@ -171,15 +243,7 @@ Key dependencies:
 |---|---|
 | `OPENAI_API_KEY` | Your OpenAI API key |
 
-Never commit your `.env` file. It is listed in `.gitignore`.
-
----
-
-## 📄 Adding New Documents
-
-1. Add your `.txt`, `.pdf`, or `.docx` files to the `docs/` folder
-2. Delete the existing `chroma_db/` folder (or it will merge with old data)
-3. Re-run `python ingest.py`
+The `.env` file is listed in `.gitignore` and will never be committed to version control.
 
 ---
 
@@ -191,4 +255,4 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## 📝 License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](LICENSE).

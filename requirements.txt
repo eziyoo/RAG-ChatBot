@@ -1,0 +1,23 @@
+# RAG Clinic Assistant — Dependencies
+# Generated for Python 3.10+
+
+# ── LlamaIndex core ──────────────────────────────────────────
+llama-index
+llama-index-core
+llama-index-vector-stores-chroma
+llama-index-llms-openai
+llama-index-embeddings-openai
+
+# ── Vector database ──────────────────────────────────────────
+chromadb
+
+# ── OpenAI ───────────────────────────────────────────────────
+openai
+
+# ── Backend ──────────────────────────────────────────────────
+fastapi
+uvicorn[standard]
+python-multipart
+
+# ── Environment ──────────────────────────────────────────────
+python-dotenv
