@@ -1,5 +1,7 @@
 import os
+import json
 import gradio as gr
+from datetime import datetime
 from dotenv import load_dotenv
 from llama_index.core import VectorStoreIndex, StorageContext, Settings
 from llama_index.vector_stores.chroma import ChromaVectorStore
@@ -27,16 +29,49 @@ index = VectorStoreIndex.from_vector_store(
 query_engine = index.as_query_engine(similarity_top_k=3)
 print("✅ Index loaded. Starting app...")
 
+# ── Chat backup ───────────────────────────────────────────────
+BACKUP_DIR = "chatBackup"
+os.makedirs(BACKUP_DIR, exist_ok=True)
+
+def save_chat(history):
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = os.path.join(BACKUP_DIR, f"chat_{timestamp}.json")
+    messages = []
+    for msg in history:
+        # Gradio 6.x passes history as list of dicts: {"role": ..., "content": ...}
+        if isinstance(msg, dict):
+            messages.append({"role": msg["role"], "content": msg["content"]})
+        # Fallback for older tuple format: (user_msg, bot_msg)
+        elif isinstance(msg, (list, tuple)):
+            user_msg, bot_msg = msg[0], msg[1]
+            if user_msg:
+                messages.append({"role": "user",      "content": user_msg})
+            if bot_msg:
+                messages.append({"role": "assistant", "content": bot_msg})
+    payload = {"saved_at": timestamp, "messages": messages}
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+    print(f"💾 Chat saved → {filename}")
+# ─────────────────────────────────────────────────────────────
+
 # Chat function
 def chat(message, history):
     try:
         response = query_engine.query(message)
-        return str(response)
+        answer = str(response)
     except Exception as e:
-        return f"⚠️ Something went wrong: {str(e)}"
+        answer = f"⚠️ Something went wrong: {str(e)}"
 
-# ✅ Gradio 6.x — theme goes on gr.Blocks, not ChatInterface
-with gr.Blocks(theme=gr.themes.Soft()) as demo:
+    # Gradio 6.x history is list of dicts — append new exchange
+    updated_history = list(history) + [
+        {"role": "user",      "content": message},
+        {"role": "assistant", "content": answer}
+    ]
+    save_chat(updated_history)
+    return answer
+
+# ✅ Gradio 6.x — theme goes in launch(), NOT in gr.Blocks()
+with gr.Blocks() as demo:
     gr.ChatInterface(
         fn=chat,
         title="🏥 Clinic Assistant",
@@ -48,8 +83,8 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
             "What should I do in a medical emergency?",
             "Does the clinic accept my insurance?",
         ],
-        chatbot=gr.Chatbot(height=500),
+        chatbot=gr.Chatbot(height=500),  # ✅ removed type="messages"
     )
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(theme=gr.themes.Soft())  # ✅ theme moved here
