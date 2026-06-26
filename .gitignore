@@ -23,3 +23,6 @@ test/
 
 # Users and Assitant chat history
 chatBackup/
+
+# Uploaded documents
+docs/
